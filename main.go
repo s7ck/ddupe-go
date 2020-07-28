@@ -19,7 +19,7 @@ func getUniqueLinesFromFile(sourceFile) map {
 		}
 	}
 }
-
+//testing git
 func check(e error) {
 	if e != nil {
 		panic(e)
