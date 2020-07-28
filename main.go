@@ -6,6 +6,20 @@ import (
 	"os"
 )
 
+func getUniqueLinesFromFile(sourceFile) map {
+	scanner := bufio.NewScanner(sourceFile)
+
+	for scanner.Scan() {
+		numSourceLines++
+
+		thisLine := scanner.Text()
+
+		if _, ok := uniqueLines[thisLine]; !ok {
+			uniqueLines[thisLine] = struct{}{}
+		}
+	}
+}
+
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -22,8 +36,20 @@ func fileExists(path string) bool {
 	return !info.IsDir()
 }
 
+func validateArgs(argMap map) bool {
+	return true
+}
+
 func main() {
 	// TODO -> Support stdin
+
+	// We need somewhere to store the unique lines from the source file so we're
+	// using a map for it. This is a map of strings with structs as values. The
+	// structs will always be empty for two reasons:
+	//   1. No value is actually needed. The key is sufficient.
+	//   2. An empty struct takes up no memory.
+	uniqueLines := make(map[string]struct{})
+	numSourceLines := 0
 
 	// Make and parse the args we want to caputre.
 	filePathPtr := flag.String("path", "", "Path to the file from which duplicates will be removed")
@@ -54,5 +80,19 @@ func main() {
 		}
 	}
 
-	// reader := bufio.NewReader()
+	sourceFile, err := os.Open("test.txt")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer sourceFile.Close()
+
+	uniqueSet := getUniqueLinesFromFile(sourceFile)
+
+	fmt.Printf("%d of %d lines were unique", len(uniqueLines), numSourceLines)
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
