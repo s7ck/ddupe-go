@@ -54,44 +54,29 @@ func main() {
 
 	// Make and parse the args we want to caputre.
 	// filePathPtr := flag.String("path", "", "Path to the file from which duplicates will be removed")
-	filePathPtr := flag.String("source", "", "Path to the source file from which duplicates will be removed")
+	inFilePtr := flag.String("source", "", "Path to the source file from which duplicates will be removed.")
+	// outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
 
 	// sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
 	// replaceFilePtr := flag.Bool("replace", false, "Replace source file with output")
-	// outputFilePtr := flag.String("output", "", "Output file")
 
 	// Do the actual arg parsing.
 	flag.Parse()
 
-	if pathIsValid(*filePathPtr) {
-		fmt.Println("Opening " + *filePathPtr)
-		sourceFile, err := os.Open(*filePathPtr)
+	if !pathIsValid(*inFilePtr) {
+		fmt.Printf("The source file '%v' does not exist.", *inFilePtr)
+		os.Exit(0)
+	} else {
+		sourceFile, err := os.Open(*inFilePtr)
+		defer sourceFile.Close()
 
-		if err != nil {
-			panic(err)
-		}
-
-		// if *sortPtr {
-		// 	fmt.Println("Sorting")
-		// }
-
-		// if *replaceFilePtr {
-		// 	fmt.Println("Replacing source file")
-		// } else {
-		// 	if *outputFilePtr == "" {
-		// 		fmt.Println("You must specify -ouput if you're not using -replace.")
-		// 	}
-		// }
+		fmt.Println("Reading the source file...")
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		defer sourceFile.Close()
-
 		// uniqueSet := getUniqueLinesFromFile(sourceFile)
 		getUniqueLinesFromFile(sourceFile)
-	} else {
-		fmt.Printf("The source file '%v' does not exist.", *filePathPtr)
 	}
 }
