@@ -1,82 +1,51 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"sort"
 )
 
-func getUniqueLinesFromFile(sourceFile *os.File) map[string]struct{} {
-	// We need somewhere to store the unique lines from the source file so we're
-	// using a map for it. This is a map of strings with structs as values. The
-	// structs will always be empty for two reasons:
-	//   1. No value is actually needed. The key is sufficient.
-	//   2. An empty struct takes up no memory.
-	uniqueLines := make(map[string]struct{})
-
-	numSourceLines := 0
-	scanner := bufio.NewScanner(sourceFile)
-
-	for scanner.Scan() {
-		numSourceLines++
-
-		thisLine := scanner.Text()
-
-		if _, ok := uniqueLines[thisLine]; !ok {
-			uniqueLines[thisLine] = struct{}{}
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%d of %d lines were unique", len(uniqueLines), numSourceLines)
-
-	return uniqueLines
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func validateArgs(argMap map[string]struct{}) bool {
-	return true
-}
-
 // TODO -> Handle invalid CLI flags.
+// TODO -> Support stdin
 func main() {
-	// TODO -> Support stdin
-
-	// Make and parse the args we want to caputre.
-	// filePathPtr := flag.String("path", "", "Path to the file from which duplicates will be removed")
+	// Setup the args we want to support.
 	inFilePtr := flag.String("source", "", "Path to the source file from which duplicates will be removed.")
-	// outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
-
-	// sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
+	outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
+	sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
 	// replaceFilePtr := flag.Bool("replace", false, "Replace source file with output")
 
-	// Do the actual arg parsing.
+	// Now we can parse those args.
 	flag.Parse()
 
-	if !pathIsValid(*inFilePtr) {
-		fmt.Printf("The source file '%v' does not exist.", *inFilePtr)
-		os.Exit(0)
+	// Make sure the path provided is valid and the file exists...
+	if !pathIsValid(inFilePtr) {
+		//... if not, show an error and exit.
+		log.Fatalf("The source file '%v' does not exist.", *inFilePtr)
 	} else {
 		sourceFile, err := os.Open(*inFilePtr)
 		defer sourceFile.Close()
 
+		handleError(err)
+
 		fmt.Println("Reading the source file...")
 
-		if err != nil {
-			log.Fatal(err)
+		uniqueLines := handleSourceFile(sourceFile)
+
+		if *sortPtr {
+			fmt.Println("Sorting..................")
+			sort.Strings(uniqueLines)
 		}
 
-		// uniqueSet := getUniqueLinesFromFile(sourceFile)
-		getUniqueLinesFromFile(sourceFile)
+		if *outFilePtr != "" {
+			handleOutFile(outFilePtr, uniqueLines)
+		} else {
+			for _, val := range uniqueLines {
+				fmt.Println(val)
+			}
+		}
+		// uniqueSet := handleSourceFile(sourceFile)
 	}
 }

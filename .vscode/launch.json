@@ -11,7 +11,10 @@
       "mode": "auto",
       "program": "${fileDirname}",
       "env": {},
-      "args": ["--source", "./test.txt"]
+      // "args": ["--source", "./test.txt", "--output", "./output.txt"]
+      // "args": ["--source", "./test2.txt", "--output", "./output.txt"]
+      "args": ["--source", "./test2.txt", "--sort"]
+      // "args": ["--source", "./test2.txt"]
     }
   ]
 }
