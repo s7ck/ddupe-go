@@ -13,7 +13,7 @@ func handleError(err error) {
 	}
 }
 
-func handleOutFile(outputPath *string, uniqueLines []string) {
+func handleOutFile(outputPath *string, uniqueLines []string, ignoreBlanks bool) {
 	outputFile, err := os.OpenFile(*outputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	defer outputFile.Close()
 	handleError(err)
@@ -21,7 +21,9 @@ func handleOutFile(outputPath *string, uniqueLines []string) {
 	writer := bufio.NewWriter(outputFile)
 
 	for _, value := range uniqueLines {
-		writer.WriteString(value + "\n")
+		if !(ignoreBlanks && value == "") {
+			writer.WriteString(value + "\n")
+		}
 	}
 
 	writer.Flush()

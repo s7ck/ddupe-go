@@ -15,6 +15,7 @@ func main() {
 	inFilePtr := flag.String("source", "", "Path to the source file from which duplicates will be removed.")
 	outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
 	sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
+	ignoreBlanksPtr := flag.Bool("ignore-blank", false, "Ignores blank lines in the source file")
 	// replaceFilePtr := flag.Bool("replace", false, "Replace source file with output")
 
 	// Now we can parse those args.
@@ -35,12 +36,11 @@ func main() {
 		uniqueLines := handleSourceFile(sourceFile)
 
 		if *sortPtr {
-			fmt.Println("Sorting..................")
 			sort.Strings(uniqueLines)
 		}
 
 		if *outFilePtr != "" {
-			handleOutFile(outFilePtr, uniqueLines)
+			handleOutFile(outFilePtr, uniqueLines, *ignoreBlanksPtr)
 		} else {
 			for _, val := range uniqueLines {
 				fmt.Println(val)
