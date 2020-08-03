@@ -13,9 +13,8 @@
       "env": {},
       // "args": ["--source", "./test.txt", "--output", "./output.txt"]
       // "args": ["--source", "./test2.txt", "--output", "./output.txt"]
-      "args": ["--source", "./test.txt", "--sort", "--output", "output.txt", "--ignore-blank"]
-      // "args": ["--source", "./test3.txt", "--sort", "--output", "output.txt"]
-      // "args": ["--source", "./test2.txt"]
+      // "args": ["--source", "./test.txt", "--sort", "--output", "output.txt", "--ignore-blank"]
+      "args": ["-source", "./test2.txt"]
     }
   ]
 }

@@ -6,41 +6,45 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 )
 
-// TODO -> Handle invalid CLI flags.
-// TODO -> Support stdin
-func main() {
-	// Setup the args we want to support.
-	inFilePtr := flag.String("source", "", "Path to the source file from which duplicates will be removed.")
-	outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
-	sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
-	ignoreBlanksPtr := flag.Bool("ignore-blank", false, "Ignores blank lines in the source file")
-	// replaceFilePtr := flag.Bool("replace", false, "Replace source file with output")
+// Make sure the path provided is valid and the file exists...
+func removeDuplicates(args map[string]interface{}) {
+	// Convert the paths, which came in as interfaces, to strings.
+	inFilePath := fmt.Sprintf("%s", args["inFile"])
+	outFilePath := fmt.Sprintf("%s", args["outFile"])
 
-	// Now we can parse those args.
-	flag.Parse()
+	// Convert the bools that came in as interfaces to strings...
+	sortOutputStr := fmt.Sprintf("%t", args["sort"])
+	ignoreBlanksStr := fmt.Sprintf("%t", args["ignoreBlanks"])
+	// replaceInFileStr := fmt.Sprintf("%t", args["replaceFile"])
 
-	// Make sure the path provided is valid and the file exists...
-	if !pathIsValid(inFilePtr) {
+	//... then convert them to bools.
+	sortOutput, _ := strconv.ParseBool(sortOutputStr)
+	ignoreBlanks, _ := strconv.ParseBool(ignoreBlanksStr)
+	// replaceInFile, _ := strconv.ParseBool(replaceInFileStr)
+
+	if !pathIsValid(inFilePath) {
 		//... if not, show an error and exit.
-		log.Fatalf("The source file '%v' does not exist.", *inFilePtr)
+		log.Fatalf("The source file '%v' does not exist.", inFilePath)
 	} else {
-		sourceFile, err := os.Open(*inFilePtr)
+		log.Println("Opening source file...")
+
+		sourceFile, err := os.Open(inFilePath)
 		defer sourceFile.Close()
 
 		handleError(err)
 
-		fmt.Println("Reading the source file...")
-
 		uniqueLines := handleSourceFile(sourceFile)
 
-		if *sortPtr {
+		if sortOutput {
+			log.Println("Sorting output...")
 			sort.Strings(uniqueLines)
 		}
 
-		if *outFilePtr != "" {
-			handleOutFile(outFilePtr, uniqueLines, *ignoreBlanksPtr)
+		if args["outputPath"] != "" {
+			handleOutFile(outFilePath, uniqueLines, ignoreBlanks)
 		} else {
 			for _, val := range uniqueLines {
 				fmt.Println(val)
@@ -48,4 +52,28 @@ func main() {
 		}
 		// uniqueSet := handleSourceFile(sourceFile)
 	}
+}
+
+// TODO -> Handle invalid CLI flags.
+// TODO -> Support stdin
+func main() {
+	args := make(map[string]interface{})
+
+	// Setup the args we want to support.
+	inFilePtr := flag.String("source", "", "Path to the source file from which duplicates will be removed.")
+	outFilePtr := flag.String("output", "", "Path to an output file of your choosing. The file does not need to exist.")
+	sortPtr := flag.Bool("sort", false, "Indicates if you want to sort the output (ascending)")
+	ignoreBlanksPtr := flag.Bool("ignore-blank", false, "Ignores blank lines in the source file")
+	replaceFilePtr := flag.Bool("replace", false, "Replace source file with output")
+
+	// Now we can parse those args.
+	flag.Parse()
+
+	args["inFile"] = *inFilePtr
+	args["outFile"] = *outFilePtr
+	args["sort"] = *sortPtr
+	args["ignoreBlanks"] = *ignoreBlanksPtr
+	args["replaceFile"] = *replaceFilePtr
+
+	removeDuplicates(args)
 }
